@@ -14,7 +14,7 @@ export default function CartPage() {
   const router = useRouter();
   const { state, dispatch, subtotal, hydrated: cartHydrated } = useCart();
   
-  // 1. Tránh Hydration Mismatch: Chỉ render nội dung sau khi mount thành công
+  // 1. Tránh Hydration Mismatch
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
@@ -25,7 +25,7 @@ export default function CartPage() {
   const [phone, setPhone] = useState("");
   const [addr, setAddr] = useState("");
   const [pm, setPM] = useState<PM>("cod");
-  const [note, setNote] = useState("");
+  const [note, setNote] = useState(""); // Đã được sử dụng ở textarea bên dưới
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<Order | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -62,9 +62,11 @@ export default function CartPage() {
 
       const res = await createOrder(payload);
       setResult(res.order);
-      dispatch({ type: "CLEAR" }); // Xóa giỏ hàng khi thành công
-    } catch (err: any) {
-      setError(err.message || "Đặt hàng thất bại.");
+      dispatch({ type: "CLEAR" }); 
+    } catch (err: unknown) {
+      // Sửa lỗi 'any': Kiểm tra nếu err là instance của Error
+      const errorMessage = err instanceof Error ? err.message : "Đặt hàng thất bại.";
+      setError(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -91,7 +93,6 @@ export default function CartPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* PHẦN DANH SÁCH & FORM */}
           <div className="lg:col-span-2 space-y-8">
             <section className="space-y-4">
               {items.map((it) => (
@@ -139,6 +140,14 @@ export default function CartPage() {
                 </div>
                 <textarea placeholder="Địa chỉ giao hàng *" className="border p-2 rounded w-full h-20" value={addr} onChange={e => setAddr(e.target.value)} required />
                 
+                {/* Sửa lỗi unused: Thêm ô nhập ghi chú */}
+                <textarea 
+                  placeholder="Ghi chú thêm (tùy chọn)" 
+                  className="border p-2 rounded w-full h-20" 
+                  value={note} 
+                  onChange={e => setNote(e.target.value)} 
+                />
+                
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-gray-700">Phương thức thanh toán</p>
                   <div className="flex gap-4">
@@ -154,7 +163,6 @@ export default function CartPage() {
             </section>
           </div>
 
-          {/* SIDEBAR TỔNG TIỀN */}
           <aside>
             <div className="border rounded-xl p-6 bg-gray-50 sticky top-4">
               <h2 className="font-semibold text-lg mb-4">Tóm tắt đơn hàng</h2>
