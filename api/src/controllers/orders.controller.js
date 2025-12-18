@@ -1,7 +1,7 @@
 const { isValidObjectId } = require("mongoose");
 const { Product } = require("../models/product.model");
 const { Order } = require("../models/order.model");
-const { calcTotals } = require("../lib/checkout");
+const { calcTotals } = require("../lib/cart");
 
 async function createOrder(req, res, next) {
   try {
